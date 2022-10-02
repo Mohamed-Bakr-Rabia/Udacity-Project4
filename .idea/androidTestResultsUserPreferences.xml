@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AndroidTestResultsUserPreferences">
+    <option name="androidTestResultsTableState">
+      <map>
+        <entry key="-1972105308">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
+                  <entry key="RZ8MA1V060R" value="120" />
+                  <entry key="Tests" value="360" />
+                  <entry key="samsung&#10; SM-A307FN" value="120" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
+        <entry key="110941273">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
+                  <entry key="Tests" value="360" />
+                  <entry key="adb-RZ8MA1V060R-8wC5Lp._adb-tls-connect._tcp" value="120" />
+                  <entry key="samsung&#10; SM-A307FN" value="120" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
+        <entry key="358718836">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
+                  <entry key="RZ8MA1V060R" value="120" />
+                  <entry key="Tests" value="360" />
+                  <entry key="samsung&#10; SM-A307FN" value="120" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
+        <entry key="1248220638">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
+                  <entry key="RF8R80YHD0Z" value="120" />
+                  <entry key="RZ8MA1V060R" value="120" />
+                  <entry key="Tests" value="360" />
+                  <entry key="adb-RF8R80YHD0Z-QFxi3B._adb-tls-connect._tcp" value="120" />
+                  <entry key="adb-RZ8MA1V060R-8wC5Lp._adb-tls-connect._tcp" value="120" />
+                  <entry key="samsung&#10; SM-A307FN" value="120" />
+                  <entry key="samsung&#10; SM-M325FV" value="120" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

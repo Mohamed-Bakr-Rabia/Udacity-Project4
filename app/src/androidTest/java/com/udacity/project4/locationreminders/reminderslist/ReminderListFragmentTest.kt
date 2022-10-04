@@ -24,36 +24,40 @@ import org.mockito.Mockito.verify
 
 @RunWith(AndroidJUnit4::class)
 @ExperimentalCoroutinesApi
-//UI Testing
+//Testing the ReminderListFragment
 @MediumTest
 class ReminderListFragmentTest {
     @Test
     fun reminders_DisplayedInUi(){
 
-        //Given reminder to display
+        //Create Reminder That will Be displayed in the fragment
         val reminder = ReminderDataItem("Title1","Description1","Location1",1.0,1.0)
-        val fragment= launchFragmentInContainer<ReminderListFragment>(null,R.style.AppTheme)
+
+        //launch the Fragment
+        val fragment = launchFragmentInContainer<ReminderListFragment>(null,R.style.AppTheme)
+
+        //create mock nav controller to mock the navigation
         val navController = mock(NavController::class.java)
 
 
-
+        //add the mock nav controller to the fragment view
         fragment.onFragment{
             Navigation.setViewNavController(it.view!!,navController)
         }
 
-        //  testing the displayed data on the UI.
+        // add the reminder that we created to the reminder list to be displayed in th UI Fragment
         fragment.withFragment {
             this._viewModel.remindersList.value = listOf(reminder)
         }
 
 
-        //testing the navigation of the fragments.
+        //perform click to the FAB button to test the navigation
         onView(withId(R.id.addReminderFAB)).perform(click())
+
+        //verify the navigation to the SaveReminderFragment
         verify(navController).navigate(
             ReminderListFragmentDirections.toSaveReminder()
         )
 
-
-        Thread.sleep(3000)
     }
 }

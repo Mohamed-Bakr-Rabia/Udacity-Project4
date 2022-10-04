@@ -24,39 +24,55 @@ import org.junit.runner.RunWith
 
 @ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
+
+//Create a SaveReminderViewModelTest To Test saveReminder function inside A SaveReminderViewModel
+
 class SaveReminderViewModelTest {
 
-    @get:Rule
-    var instantExecutorRule = InstantTaskExecutorRule()
-
-
-
-
+    //Create the reminder that will be save later using validateAndSaveReminder in the SaveReminderViewModel
     private val reminder1 = ReminderDataItem("Title1","Description1","Location1",1.0,1.0)
+    private val reminder2 = ReminderDataItem("Title2","Description2","Location2",2.0,2.0)
+    private val reminder3 = ReminderDataItem("Title3","Description3","Location3",3.0,3.0)
+
     private val reminders = mutableListOf<ReminderDTO>()
+
+    //create fakeDataSource will be used by saveReminderViewModel
     private lateinit var fakeDataSource:FakeDataSource
+    //create SaveReminderViewModel
     private lateinit var saveReminderViewModel: SaveReminderViewModel
 
 
+    //initiate objects before the test
     @Before
     fun setupViewModel(){
+        //initiate fakeDataSource and saveReminderViewModel
         fakeDataSource = FakeDataSource(reminders)
         saveReminderViewModel = SaveReminderViewModel(ApplicationProvider.getApplicationContext(),fakeDataSource)
 
-        //Save Reminder
-        saveReminderViewModel.validateAndSaveReminder(reminder1)
     }
 
     @Test
     fun testSaveReminderView(){
+        //call validateAndSaveReminder to save 3 reminders
+        saveReminderViewModel.validateAndSaveReminder(reminder1)
+        saveReminderViewModel.validateAndSaveReminder(reminder2)
+        saveReminderViewModel.validateAndSaveReminder(reminder3)
+
 
         runBlockingTest {
-            var stringId1: String
+            //load the data from the data source
+            var list = ( fakeDataSource.getReminders() as Result.Success ).data
 
 
-            //test reminder
-            stringId1 = (fakeDataSource.getReminder(reminder1.id) as Result.Success).data.id
-            Assert.assertEquals(reminder1.id, stringId1)
+            //convert list from ReminderDTO objects to ReminderDataItem objects
+            var reminderDataListItem = list.map {
+                ReminderDataItem(it.title,it.description,it.location,it.latitude,it.longitude,it.id)
+
+            }
+
+
+            //compare the loaded list from the data source to the list we created
+            Assert.assertEquals(reminderDataListItem, listOf(reminder1,reminder2,reminder3))
 
 
         }

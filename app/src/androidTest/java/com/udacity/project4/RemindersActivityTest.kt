@@ -1,16 +1,25 @@
 package com.udacity.project4
 
 import android.app.Application
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
+import androidx.test.espresso.Espresso.closeSoftKeyboard
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.typeText
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import com.udacity.project4.locationreminders.RemindersActivity
 import com.udacity.project4.locationreminders.data.ReminderDataSource
+import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
 import com.udacity.project4.locationreminders.reminderslist.RemindersListViewModel
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
@@ -65,7 +74,39 @@ class RemindersActivityTest :
         }
     }
 
+    //test for save reminder and show it in the ReminderListFragment
+    @Test
+    fun saveReminder(){
+        runBlocking {
+            val reminderDTO = ReminderDTO("Title1","Description1","Location1",1.0,1.0)
 
-//    TODO: add End to End testing to the app
+            //start RemindersActivity Screen
+            val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
+
+           // Get our real SaveReminderViewModel
+            val saveReminderViewModel :SaveReminderViewModel = get()
+
+
+            //Go to SaveReminderFragment
+            onView(withId(R.id.addReminderFAB)).perform(click())
+
+            //add title and description
+            onView(withId(R.id.reminderTitle)).perform(typeText(reminderDTO.title))
+            onView(withId(R.id.reminderDescription)).perform(typeText(reminderDTO.description))
+
+            //add location to the  view model
+            saveReminderViewModel.longitude.postValue(reminderDTO.longitude)
+            saveReminderViewModel.latitude.postValue(reminderDTO.latitude)
+            saveReminderViewModel.reminderSelectedLocationStr.postValue(reminderDTO.location)
+            closeSoftKeyboard()
+
+            //save reminder and go to ReminderListFragment To see it
+            onView(withId(R.id.saveReminder)).perform(click())
+
+
+            activityScenario.close()
+        }
+    }
+
 
 }

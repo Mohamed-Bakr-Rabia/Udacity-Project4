@@ -32,7 +32,11 @@ class RemindersDaoTest {
     @Before
     fun init(){
         //initiate the database in memory for testing
-        database = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext(),RemindersDatabase::class.java).build()
+        database = Room.inMemoryDatabaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            RemindersDatabase::class.java)
+            .allowMainThreadQueries()
+            .build()
 
     }
 
@@ -43,15 +47,18 @@ class RemindersDaoTest {
 
     @Test
     //testing the insertion and retrieving data
-    fun insertingAndRetrievingData () = runBlockingTest {
+    fun insertingAndRetrievingDataById () = runBlockingTest {
 
-        //Given create 2 reminder the will be saved in the database
+        //GIVEN
+        // create 2 reminder the will be saved in the database
         val reminderDTO = ReminderDTO("Title1", "Description1", "Location1", 1.0, 1.0)
         val reminderDTO2 = ReminderDTO("Title2", "Description2", "Location2", 2.0, 2.0)
 
+
+        //THEN
         //save the 2 reminder in the database
         database.reminderDao().saveReminder(reminderDTO)
-        database.reminderDao().saveReminder(reminderDTO)
+        database.reminderDao().saveReminder(reminderDTO2)
 
 
 
@@ -59,5 +66,11 @@ class RemindersDaoTest {
         val loaded = database.reminderDao().getReminderById(reminderDTO.id)
         Assert.assertEquals(loaded?.id,reminderDTO.id)
 
+    }
+
+    @Test
+    fun checkDataNotFound() = runBlockingTest {
+        //Will check with empty list
+        Assert.assertEquals(database.reminderDao().getReminders(),listOf<ReminderDTO>())
     }
 }

@@ -49,17 +49,18 @@ class SaveReminderFragment : BaseFragment() {
                 NavigationCommand.To(SaveReminderFragmentDirections.actionSaveReminderFragmentToSelectLocationFragment())
         }
 
-        binding.saveReminder.setOnClickListener {
-            val title = _viewModel.reminderTitle.value
-            val description = _viewModel.reminderDescription.value
-            val location = _viewModel.reminderSelectedLocationStr.value
-            val latitude = _viewModel.latitude.value
-            val longitude = _viewModel.longitude.value
 
-            val reminderDataItem = ReminderDataItem(
-                title,description,location,latitude,longitude
+        binding.saveReminder.setOnClickListener {
+            _viewModel.validateAndSaveReminder(
+                ReminderDataItem(
+                    _viewModel.reminderTitle.value,
+                    _viewModel.reminderDescription.value,
+                    _viewModel.reminderSelectedLocationStr.value,
+                    _viewModel.latitude.value,
+                    _viewModel.longitude.value
+
+                )
             )
-            _viewModel.validateAndSaveReminder(reminderDataItem)
 
         }
     }

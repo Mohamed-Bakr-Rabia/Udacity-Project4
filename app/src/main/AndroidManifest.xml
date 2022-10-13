@@ -46,6 +46,7 @@
         </activity>
         <activity android:name=".locationreminders.RemindersActivity">
         </activity>
+
         <receiver
             android:name=".locationreminders.geofence.GeofenceBroadcastReceiver"
             android:enabled="true"

@@ -4,16 +4,21 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 import android.Manifest
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
+import android.app.AlertDialog
 import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.*
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
+import androidx.core.app.ActivityCompat.requestPermissions
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.findNavController
+import com.google.android.gms.auth.api.signin.GoogleSignIn.requestPermissions
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -32,31 +37,60 @@ import org.koin.android.ext.android.inject
 
 class SelectLocationFragment : BaseFragment() ,OnMapReadyCallback{
 
+    private  var enableMyLocation: Boolean = false
+
     //Use Koin to get the view model of the SaveReminder
     override val _viewModel: SaveReminderViewModel by inject()
     private lateinit var binding: FragmentSelectLocationBinding
-    lateinit var  googleMap:GoogleMap
+    private lateinit var  googleMap:GoogleMap
+    private var initMaps = false
     private val REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE = 1001
     private val REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE = 1002
     private val REQUEST_TURN_DEVICE_LOCATION_ON = 1003
     private val runningQOrLater = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         binding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_select_location, container, false)
 
+
+        if (isPermissionGranted()){
+            checkDeviceLocation()
+
+            Toast.makeText(requireContext(),"Permission Granted",Toast.LENGTH_SHORT).show()
+            initMaps = true
+            (childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment).getMapAsync(this)
+            binding.save.setOnClickListener {
+                onLocationSelected()
+            }
+        }
+        else {
+
+
+            var permissionArray = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+            val resultCode = when {
+                runningQOrLater -> {
+                    permissionArray += Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                    REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE
+                }
+                else -> REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE
+
+            }
+            _viewModel.showSnackBar.value = "Permission Require"
+            requestPermissions(requireActivity(), permissionArray,resultCode)
+        }
+
         binding.viewModel = _viewModel
         binding.lifecycleOwner = this
 
         setHasOptionsMenu(true)
         setDisplayHomeAsUpEnabled(true)
-        (childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment).getMapAsync(this)
+
 //
-        binding.save.setOnClickListener {
-            onLocationSelected()
-        }
+
 
         return binding.root
     }
@@ -72,17 +106,22 @@ class SelectLocationFragment : BaseFragment() ,OnMapReadyCallback{
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.normal_map -> {
+            if (initMaps)
             googleMap.mapType = GoogleMap.MAP_TYPE_NORMAL
-            true        }
+            true
+        }
         R.id.hybrid_map -> {
+            if (initMaps)
             googleMap.mapType = GoogleMap.MAP_TYPE_HYBRID
             true
         }
         R.id.satellite_map -> {
+            if (initMaps)
             googleMap.mapType = GoogleMap.MAP_TYPE_SATELLITE
             true
         }
         R.id.terrain_map -> {
+            if (initMaps)
             googleMap.mapType = GoogleMap.MAP_TYPE_TERRAIN
             true
         }
@@ -93,16 +132,18 @@ class SelectLocationFragment : BaseFragment() ,OnMapReadyCallback{
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
-
+        if (enableMyLocation)
+            googleMap.isMyLocationEnabled = true
         try {
             googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(requireContext(),R.raw.map_style))
 
         } catch (error:Exception){
 
         }
-        grandPermission()
+       // grandPermission()
 
         googleMap.setOnPoiClickListener {
+            googleMap.clear()
             googleMap.addMarker(MarkerOptions().position(it.latLng).title(it.name))
             _viewModel.selectedPOI.value = it
             _viewModel.latitude.value = it.latLng.latitude
@@ -110,6 +151,13 @@ class SelectLocationFragment : BaseFragment() ,OnMapReadyCallback{
             _viewModel.reminderSelectedLocationStr.value = it.name
 
 
+        }
+        googleMap.setOnMapLongClickListener {
+            googleMap.clear()
+            googleMap.addMarker(MarkerOptions().position(it).title(it.latitude.toString() + it.longitude.toString()))
+            _viewModel.latitude.value = it.latitude
+            _viewModel.longitude.value = it.longitude
+            _viewModel.reminderSelectedLocationStr.value = it.latitude.toString() + it.longitude.toString()
         }
 
     }
@@ -132,40 +180,21 @@ class SelectLocationFragment : BaseFragment() ,OnMapReadyCallback{
 
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun isPermissionGranted(): Boolean {
+
         val foregroundPermission = (
                 PackageManager.PERMISSION_GRANTED ==
-                        ActivityCompat.checkSelfPermission(requireContext(),
+                        ContextCompat.checkSelfPermission(requireContext(),
                             Manifest.permission.ACCESS_FINE_LOCATION))
         val backgroundPermission =
             if (runningQOrLater) {
                 PackageManager.PERMISSION_GRANTED ==
-                        ActivityCompat.checkSelfPermission(
+                        ContextCompat.checkSelfPermission(
                             requireContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION
                         )
             } else {
                 true
             }
         return foregroundPermission && backgroundPermission
-    }
-    @RequiresApi(Build.VERSION_CODES.Q)
-    @SuppressLint("MissingPermission")
-    private fun grandPermission(){
-        if (isPermissionGranted()){
-            checkDeviceLocation()
-        }
-        else {
-            var permissionArray = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
-            val resultCode = when {
-                runningQOrLater -> {
-                    permissionArray += Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                    REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE
-                }
-                else -> REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE
-
-            }
-            ActivityCompat.requestPermissions(requireActivity(), permissionArray,resultCode)
-
-        }
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -211,7 +240,7 @@ class SelectLocationFragment : BaseFragment() ,OnMapReadyCallback{
         locationSettingsResponseTask.addOnCompleteListener {
             if (it.isSuccessful)
             {
-                googleMap.isMyLocationEnabled = true
+                enableMyLocation = true
                 getMyLocation()
             }
         }

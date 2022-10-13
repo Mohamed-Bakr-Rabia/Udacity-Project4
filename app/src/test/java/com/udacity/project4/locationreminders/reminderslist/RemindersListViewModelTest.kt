@@ -1,15 +1,22 @@
 package com.udacity.project4.locationreminders.reminderslist
 
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.udacity.project4.locationreminders.MainCoroutineRule
 import com.udacity.project4.locationreminders.data.FakeDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.getOrAwaitValue
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.pauseDispatcher
+import kotlinx.coroutines.test.resumeDispatcher
+import org.bouncycastle.jcajce.provider.symmetric.Threefish
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.core.context.stopKoin
@@ -18,6 +25,13 @@ import org.koin.core.context.stopKoin
 @ExperimentalCoroutinesApi
 //Create a RemindersListViewModelTest To Test The Function inside A RemindersListViewModel
 class RemindersListViewModelTest {
+
+    @Rule
+    @JvmField
+    val instantExecutorRule = InstantTaskExecutorRule()
+
+    @get:Rule
+    var mainCoroutineRule = MainCoroutineRule()
 
     private lateinit var fakeDataSource: FakeDataSource
     private lateinit var remindersListViewModel: RemindersListViewModel
@@ -85,6 +99,29 @@ class RemindersListViewModelTest {
 
         //test the results
         Assert.assertEquals(error,"Reminders Empty")
+
+    }
+
+    @Test
+    fun check_loading (){
+
+        mainCoroutineRule.pauseDispatcher()
+        //LoadReminder
+        remindersListViewModel.loadReminders()
+
+        //observe the loading object
+        val stillLoading = remindersListViewModel.showLoading.getOrAwaitValue()
+
+        //make stillLoading = true means it's still loading
+        Assert.assertEquals(stillLoading,true)
+
+        mainCoroutineRule.resumeDispatcher()
+
+        //observe the loading object
+        val doneLoading = remindersListViewModel.showLoading.getOrAwaitValue()
+
+        //make sure loading = false means it's not loading
+        Assert.assertEquals(doneLoading,false)
 
     }
 

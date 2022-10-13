@@ -80,7 +80,6 @@ class SaveReminderViewModel(val app: Application, private val dataSource: Remind
             showLoading.value = false
             showToast.value = app.getString(R.string.reminder_saved)
             addGeofence(reminderData)
-            navigationCommand.value = NavigationCommand.Back
         }
     }
 
@@ -116,9 +115,10 @@ class SaveReminderViewModel(val app: Application, private val dataSource: Remind
 
 
         geofencingClient.addGeofences(geofenceRequest,geofencePendingIntent).addOnSuccessListener {
-            showToast.value = "Added GeoFences"
+            showSnackBar.value = "Added GeoFences"
+            navigationCommand.value = NavigationCommand.Back
         }.addOnFailureListener {
-            showSnackBarInt.value = R.string.geofence_not_added
+         //   showToast.value = app.resources.getString(R.string.geofence_not_added)
         }
     }
 }

@@ -70,12 +70,27 @@ class SaveReminderViewModelTest {
 
             }
 
-
             //compare the loaded list from the data source to the list we created
             Assert.assertEquals(reminderDataListItem, listOf(reminder1,reminder2,reminder3))
 
-
         }
+
+    }
+
+    @Test
+    fun check_loading (){
+
+        //save reminders to the datasource
+        saveReminderViewModel.validateAndSaveReminder(reminder1)
+        saveReminderViewModel.validateAndSaveReminder(reminder2)
+        saveReminderViewModel.validateAndSaveReminder(reminder3)
+
+        //observe the loading object
+        val showLoading = saveReminderViewModel.showLoading.getOrAwaitValue()
+
+
+        //make sure loading = false means it's not loading
+        Assert.assertEquals(showLoading,false)
 
     }
 
